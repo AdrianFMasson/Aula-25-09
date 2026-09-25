@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cadastro de Clientes</title>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
 </head>
 <body>
     <div class="container">
@@ -137,6 +137,17 @@
             }
         });
 
+        // ---------- Leitura de erros vindos da API (FastAPI usa "detail") ----------
+        function extrairMensagemErro(dados) {
+            if (!dados) return 'Erro ao cadastrar cliente.';
+            if (dados.erro) return dados.erro;
+            if (typeof dados.detail === 'string') return dados.detail;
+            if (Array.isArray(dados.detail)) {
+                return dados.detail.map((d) => d.msg || JSON.stringify(d)).join(', ');
+            }
+            return 'Erro ao cadastrar cliente.';
+        }
+
         // ---------- Mensagens de feedback ----------
         function mostrarMensagem(texto, tipo) {
             mensagemDiv.textContent = texto;
@@ -207,7 +218,7 @@
                     inputNome.focus();
                     await carregarClientes();
                 } else {
-                    mostrarMensagem(dados.erro || 'Erro ao cadastrar cliente.', 'erro');
+                    mostrarMensagem(extrairMensagemErro(dados), 'erro');
                 }
             } catch (erro) {
                 mostrarMensagem('Erro de conexão com o servidor.', 'erro');
