@@ -1,0 +1,174 @@
+* {
+    box-sizing: border-box;
+    font-family: Copperplate, 'Copperplate Gothic Light', serif;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #FFE5D9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.container {
+    background-color: #ffffff;
+    width: 640px;
+    max-width: 95vw;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* Barra estilo janela (macOS) com os três pontinhos */
+.window-bar {
+    background-color: #F2F2F2;
+    padding: 14px 18px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.window-bar .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.window-bar .dot.red { background-color: #FF5F56; }
+.window-bar .dot.yellow { background-color: #FFBD2E; }
+.window-bar .dot.green { background-color: #27C93F; }
+
+.conteudo {
+    padding: 30px 35px 35px;
+}
+
+header h1 {
+    margin: 0 0 24px;
+    font-size: 1.7rem;
+    color: #005F73;
+    letter-spacing: 0.5px;
+}
+
+.mensagem {
+    text-align: left;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    min-height: 18px;
+}
+
+.mensagem.erro { color: #b00020; }
+.mensagem.sucesso { color: #2E7D32; }
+
+/* Grade 2 colunas x 2 linhas para os campos do formulário */
+.campos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo label {
+    margin-bottom: 8px;
+    color: #4a4a4a;
+    font-size: 0.85rem;
+}
+
+.campo input {
+    padding: 12px 14px;
+    border: 1.5px solid #B87333;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: #fbfbfb;
+    color: #333;
+}
+
+.campo input:disabled {
+    background-color: #f2f2f2;
+    border-color: #d9c5b0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.campo input:focus {
+    outline: none;
+    border-color: #0A9396;
+}
+
+/* Botão Cadastrar - alinhado à direita, abaixo dos campos */
+.acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 26px;
+}
+
+#btnEnviar {
+    background-color: #13C165;
+    color: #ffffff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#btnEnviar:hover {
+    background-color: #0FA655;
+}
+
+#btnEnviar:disabled {
+    background-color: #a5a5a5;
+    cursor: not-allowed;
+}
+
+/* Tabela de cadastrados */
+.tabela-wrapper {
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+thead th {
+    background-color: #fafafa;
+    color: #4a4a4a;
+    padding: 12px 14px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 0.8rem;
+}
+
+tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
