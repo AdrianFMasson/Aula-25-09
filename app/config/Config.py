@@ -1,4 +1,11 @@
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Caminho absoluto até a raiz do projeto (uma pasta acima de config/),
+# para que o .env seja encontrado não importa de onde o comando for executado.
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_ENV_PATH = os.path.join(_BASE_DIR, ".env")
 
 
 class Settings(BaseSettings):
@@ -15,7 +22,7 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_PATH, extra="ignore")
 
 
 settings = Settings()

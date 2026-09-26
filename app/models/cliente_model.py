@@ -1,21 +1,20 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 
 class Cliente(SQLModel, table=True):
-    """Tabela `clientes` no MySQL."""
+    """Tabela clientes no MySQL."""
 
     __tablename__ = "clientes"
 
-    id: Optional[int] = Field(default=None, primary_key=True)
-    nome: str = Field(max_length=150)
+    id: int | None = Field(default=None, primary_key=True)
+    nome: str = Field(max_length=100)
     email: str = Field(max_length=150)
     telefone: str = Field(max_length=20)
     cidade: str = Field(max_length=100)
 
 
 class ClienteCreate(SQLModel):
-    """Schema de entrada para criação/atualização de cliente."""
+    """Dados aceitos para criação ou atualização de cliente."""
 
     nome: str
     email: str
@@ -24,7 +23,7 @@ class ClienteCreate(SQLModel):
 
 
 class ClienteRead(SQLModel):
-    """Schema de saída (o que a API devolve)."""
+    """Dados devolvidos pela API."""
 
     id: int
     nome: str
