@@ -1,239 +1,598 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cadastro de Clientes</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
-    <div class="container">
-        <div class="window-bar">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-        </div>
 
-        <div class="conteudo">
-            <header>
-                <h1>Cadastro de Clientes</h1>
-            </header>
+```
+<div class="container">
 
-            <div id="mensagem" class="mensagem"></div>
-
-            <form id="formCliente">
-                <div class="campos-grid">
-                    <div class="campo">
-                        <label for="nome">Nome</label>
-                        <input type="text" id="nome" name="nome" autocomplete="off">
-                    </div>
-
-                    <div class="campo">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" name="email" autocomplete="off" disabled>
-                    </div>
-
-                    <div class="campo">
-                        <label for="telefone">Telefone</label>
-                        <input type="text" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" inputmode="numeric" autocomplete="off" disabled>
-                    </div>
-
-                    <div class="campo">
-                        <label for="cidade">Cidade</label>
-                        <input type="text" id="cidade" name="cidade" autocomplete="off" disabled>
-                    </div>
-                </div>
-
-                <div class="acoes">
-                    <button id="btnEnviar" type="button">Cadastrar</button>
-                </div>
-            </form>
-
-            <div class="tabela-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Telefone</th>
-                            <th>Cidade</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoTabela">
-                        <!-- Linhas inseridas dinamicamente via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div class="window-bar">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
     </div>
 
-    <script>
-        const inputNome = document.getElementById('nome');
-        const inputEmail = document.getElementById('email');
-        const inputTelefone = document.getElementById('telefone');
-        const inputCidade = document.getElementById('cidade');
-        const btnEnviar = document.getElementById('btnEnviar');
-        const corpoTabela = document.getElementById('corpoTabela');
-        const mensagemDiv = document.getElementById('mensagem');
+    <div class="conteudo">
 
-        // ---------- Liberação sequencial dos campos ----------
-        function atualizarLiberacao() {
-            if (inputNome.value.trim().length > 0) {
-                inputEmail.disabled = false;
-            } else {
-                inputEmail.disabled = true;
-                inputEmail.value = '';
-            }
+        <header>
+            <h1>Cadastro de Clientes</h1>
+        </header>
 
-            if (!inputEmail.disabled && inputEmail.value.trim().length > 0) {
-                inputTelefone.disabled = false;
-            } else {
-                inputTelefone.disabled = true;
-                inputTelefone.value = '';
-            }
+        <div id="mensagem" class="mensagem"></div>
 
-            if (!inputTelefone.disabled && inputTelefone.value.trim().length > 0) {
-                inputCidade.disabled = false;
-            } else {
-                inputCidade.disabled = true;
-                inputCidade.value = '';
-            }
+        <form id="formCliente">
+
+            <div class="campos-grid">
+
+                <div class="campo">
+                    <label for="nome">Nome</label>
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="email">E-mail</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        autocomplete="off"
+                        disabled
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="telefone">Telefone</label>
+                    <input
+                        type="text"
+                        id="telefone"
+                        name="telefone"
+                        placeholder="(XX) XXXXX-XXXX"
+                        inputmode="numeric"
+                        autocomplete="off"
+                        disabled
+                    >
+                </div>
+
+                <div class="campo">
+                    <label for="cidade">Cidade</label>
+                    <input
+                        type="text"
+                        id="cidade"
+                        name="cidade"
+                        autocomplete="off"
+                        disabled
+                    >
+                </div>
+
+            </div>
+
+            <div class="acoes">
+                <button id="btnEnviar" type="button">
+                    Cadastrar
+                </button>
+            </div>
+
+        </form>
+
+        <div class="tabela-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Telefone</th>
+                        <th>Cidade</th>
+                    </tr>
+                </thead>
+
+                <tbody id="corpoTabela">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    // =========================================================
+    // API
+    // =========================================================
+
+    const API_URL = 'http://127.0.0.1:8000/api/clientes';
+
+
+    // =========================================================
+    // ELEMENTOS
+    // =========================================================
+
+    const inputNome = document.getElementById('nome');
+    const inputEmail = document.getElementById('email');
+    const inputTelefone = document.getElementById('telefone');
+    const inputCidade = document.getElementById('cidade');
+
+    const btnEnviar = document.getElementById('btnEnviar');
+
+    const corpoTabela = document.getElementById('corpoTabela');
+    const mensagemDiv = document.getElementById('mensagem');
+
+
+    // =========================================================
+    // LIBERAÇÃO SEQUENCIAL DOS CAMPOS
+    // =========================================================
+
+    function atualizarLiberacao() {
+
+        // 1º campo: Nome
+        // Ao preencher, libera o E-mail.
+
+        if (inputNome.value.trim().length > 0) {
+
+            inputEmail.disabled = false;
+
+        } else {
+
+            inputEmail.disabled = true;
+            inputEmail.value = '';
+
+            inputTelefone.disabled = true;
+            inputTelefone.value = '';
+
+            inputCidade.disabled = true;
+            inputCidade.value = '';
+
+            return;
         }
 
-        inputNome.addEventListener('input', atualizarLiberacao);
-        inputEmail.addEventListener('input', atualizarLiberacao);
-        inputTelefone.addEventListener('input', atualizarLiberacao);
 
-        // ---------- Máscara de telefone ----------
-        function formatarTelefone(valor) {
-            valor = valor.replace(/\D/g, '');
-            valor = valor.slice(0, 11);
+        // 2º campo: E-mail
+        // Ao preencher, libera o Telefone.
 
-            if (valor.length > 10) {
-                valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
-            } else if (valor.length > 6) {
-                valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-            } else if (valor.length > 2) {
-                valor = valor.replace(/^(\d{2})(\d{0,5}).*/, '($1) $2');
-            } else if (valor.length > 0) {
-                valor = valor.replace(/^(\d*)/, '($1');
-            }
+        if (inputEmail.value.trim().length > 0) {
 
-            return valor;
+            inputTelefone.disabled = false;
+
+        } else {
+
+            inputTelefone.disabled = true;
+            inputTelefone.value = '';
+
+            inputCidade.disabled = true;
+            inputCidade.value = '';
+
+            return;
         }
 
-        inputTelefone.addEventListener('input', (e) => {
-            const posicaoCursor = e.target.selectionStart;
-            const tamanhoAntes = e.target.value.length;
-            e.target.value = formatarTelefone(e.target.value);
-            const tamanhoDepois = e.target.value.length;
-            const novaPosicao = posicaoCursor + (tamanhoDepois - tamanhoAntes);
-            e.target.setSelectionRange(novaPosicao, novaPosicao);
-        });
 
-        inputTelefone.addEventListener('keypress', (e) => {
-            if (!/[0-9]/.test(e.key)) {
-                e.preventDefault();
-            }
-        });
+        // 3º campo: Telefone
+        // Ao preencher, libera a Cidade.
 
-        // ---------- Leitura de erros vindos da API (FastAPI usa "detail") ----------
-        function extrairMensagemErro(dados) {
-            if (!dados) return 'Erro ao cadastrar cliente.';
-            if (dados.erro) return dados.erro;
-            if (typeof dados.detail === 'string') return dados.detail;
-            if (Array.isArray(dados.detail)) {
-                return dados.detail.map((d) => d.msg || JSON.stringify(d)).join(', ');
-            }
+        if (inputTelefone.value.trim().length > 0) {
+
+            inputCidade.disabled = false;
+
+        } else {
+
+            inputCidade.disabled = true;
+            inputCidade.value = '';
+
+        }
+
+    }
+
+
+    inputNome.addEventListener(
+        'input',
+        atualizarLiberacao
+    );
+
+    inputEmail.addEventListener(
+        'input',
+        atualizarLiberacao
+    );
+
+    inputTelefone.addEventListener(
+        'input',
+        atualizarLiberacao
+    );
+
+
+    // =========================================================
+    // MÁSCARA DE TELEFONE
+    // =========================================================
+
+    function formatarTelefone(valor) {
+
+        valor = valor.replace(/\D/g, '');
+
+        valor = valor.slice(0, 11);
+
+        if (valor.length > 10) {
+
+            valor = valor.replace(
+                /^(\d{2})(\d{5})(\d{0,4}).*/,
+                '($1) $2-$3'
+            );
+
+        } else if (valor.length > 6) {
+
+            valor = valor.replace(
+                /^(\d{2})(\d{4})(\d{0,4}).*/,
+                '($1) $2-$3'
+            );
+
+        } else if (valor.length > 2) {
+
+            valor = valor.replace(
+                /^(\d{2})(\d{0,5}).*/,
+                '($1) $2'
+            );
+
+        } else if (valor.length > 0) {
+
+            valor = valor.replace(
+                /^(\d*)/,
+                '($1'
+            );
+
+        }
+
+        return valor;
+    }
+
+
+    inputTelefone.addEventListener('input', (e) => {
+
+        const posicaoCursor =
+            e.target.selectionStart;
+
+        const tamanhoAntes =
+            e.target.value.length;
+
+        e.target.value =
+            formatarTelefone(e.target.value);
+
+        const tamanhoDepois =
+            e.target.value.length;
+
+        const novaPosicao =
+            posicaoCursor +
+            (tamanhoDepois - tamanhoAntes);
+
+        e.target.setSelectionRange(
+            novaPosicao,
+            novaPosicao
+        );
+
+    });
+
+
+    inputTelefone.addEventListener('keypress', (e) => {
+
+        if (!/[0-9]/.test(e.key)) {
+            e.preventDefault();
+        }
+
+    });
+
+
+    // =========================================================
+    // MENSAGEM DE ERRO DA API
+    // =========================================================
+
+    function extrairMensagemErro(dados) {
+
+        if (!dados) {
             return 'Erro ao cadastrar cliente.';
         }
 
-        // ---------- Mensagens de feedback ----------
-        function mostrarMensagem(texto, tipo) {
-            mensagemDiv.textContent = texto;
-            mensagemDiv.className = 'mensagem ' + tipo;
-            setTimeout(() => {
-                mensagemDiv.textContent = '';
-                mensagemDiv.className = 'mensagem';
-            }, 3500);
+        if (dados.erro) {
+            return dados.erro;
         }
 
-        // ---------- Renderização da tabela ----------
-        function renderizarTabela(clientes) {
-            corpoTabela.innerHTML = '';
-            clientes.forEach((cliente) => {
-                const linha = document.createElement('tr');
-                linha.innerHTML = `
-                    <td>${cliente.nome}</td>
-                    <td>${cliente.email}</td>
-                    <td>${cliente.telefone}</td>
-                    <td>${cliente.cidade}</td>
-                `;
-                corpoTabela.appendChild(linha);
-            });
+        if (typeof dados.detail === 'string') {
+            return dados.detail;
         }
 
-        async function carregarClientes() {
-            try {
-                const resposta = await fetch('/api/clientes');
-                const dados = await resposta.json();
-                if (resposta.ok) {
-                    renderizarTabela(dados);
-                }
-            } catch (erro) {
-                console.error('Erro ao carregar clientes:', erro);
+        if (Array.isArray(dados.detail)) {
+
+            return dados.detail
+                .map(d => d.msg || JSON.stringify(d))
+                .join(', ');
+
+        }
+
+        return 'Erro ao cadastrar cliente.';
+    }
+
+
+    // =========================================================
+    // MENSAGEM DE FEEDBACK
+    // =========================================================
+
+    function mostrarMensagem(texto, tipo) {
+
+        mensagemDiv.textContent = texto;
+
+        mensagemDiv.className =
+            'mensagem ' + tipo;
+
+        setTimeout(() => {
+
+            mensagemDiv.textContent = '';
+
+            mensagemDiv.className =
+                'mensagem';
+
+        }, 3500);
+
+    }
+
+
+    // =========================================================
+    // TABELA
+    // =========================================================
+
+    function renderizarTabela(clientes) {
+
+        corpoTabela.innerHTML = '';
+
+        clientes.forEach(cliente => {
+
+            const linha =
+                document.createElement('tr');
+
+            linha.innerHTML = `
+                <td>${cliente.nome ?? ''}</td>
+                <td>${cliente.email ?? ''}</td>
+                <td>${cliente.telefone ?? ''}</td>
+                <td>${cliente.cidade ?? ''}</td>
+            `;
+
+            corpoTabela.appendChild(linha);
+
+        });
+
+    }
+
+
+    // =========================================================
+    // CARREGAR CLIENTES
+    // =========================================================
+
+    async function carregarClientes() {
+
+        try {
+
+            const resposta =
+                await fetch(API_URL);
+
+            const dados =
+                await resposta.json();
+
+            if (resposta.ok) {
+
+                renderizarTabela(dados);
+
+            } else {
+
+                console.error(
+                    'Erro ao carregar clientes:',
+                    dados
+                );
+
             }
+
+        } catch (erro) {
+
+            console.error(
+                'Erro de conexão com o servidor:',
+                erro
+            );
+
         }
 
-        // ---------- Envio do formulário ----------
-        async function enviarCadastro() {
-            const nome = inputNome.value.trim();
-            const email = inputEmail.value.trim();
-            const telefone = inputTelefone.value.trim();
-            const cidade = inputCidade.value.trim();
+    }
 
-            if (!nome || !email || !telefone || !cidade) {
-                mostrarMensagem('Preencha todos os campos antes de enviar.', 'erro');
-                return;
-            }
 
-            btnEnviar.disabled = true;
+    // =========================================================
+    // CADASTRAR CLIENTE
+    // =========================================================
 
-            try {
-                const resposta = await fetch('/api/clientes', {
+    async function enviarCadastro() {
+
+        const nome =
+            inputNome.value.trim();
+
+        const email =
+            inputEmail.value.trim();
+
+        const telefone =
+            inputTelefone.value.trim();
+
+        const cidade =
+            inputCidade.value.trim();
+
+
+        // Todos os campos precisam estar preenchidos.
+
+        if (
+            !nome ||
+            !email ||
+            !telefone ||
+            !cidade
+        ) {
+
+            mostrarMensagem(
+                'Preencha todos os campos antes de enviar.',
+                'erro'
+            );
+
+            return;
+        }
+
+
+        btnEnviar.disabled = true;
+
+
+        try {
+
+            // IMPORTANTE:
+            // Envia UM objeto, e não uma lista.
+
+            const cliente = {
+                nome: nome,
+                email: email,
+                telefone: telefone,
+                cidade: cidade
+            };
+
+
+            console.log(
+                'Dados enviados para a API:',
+                cliente
+            );
+
+
+            const resposta =
+                await fetch(API_URL, {
+
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, email, telefone, cidade })
+
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+                        'Accept':
+                            'application/json'
+                    },
+
+                    body:
+                        JSON.stringify(cliente)
+
                 });
 
-                const dados = await resposta.json();
 
-                if (resposta.ok) {
-                    mostrarMensagem('Cliente cadastrado com sucesso!', 'sucesso');
-                    inputNome.value = '';
-                    inputEmail.value = '';
-                    inputTelefone.value = '';
-                    inputCidade.value = '';
-                    atualizarLiberacao();
-                    inputNome.focus();
-                    await carregarClientes();
-                } else {
-                    mostrarMensagem(extrairMensagemErro(dados), 'erro');
-                }
-            } catch (erro) {
-                mostrarMensagem('Erro de conexão com o servidor.', 'erro');
-                console.error(erro);
-            } finally {
-                btnEnviar.disabled = false;
+            const dados =
+                await resposta.json();
+
+
+            console.log(
+                'Resposta da API:',
+                dados
+            );
+
+
+            if (resposta.ok) {
+
+                mostrarMensagem(
+                    'Cliente cadastrado com sucesso!',
+                    'sucesso'
+                );
+
+
+                // Limpa os campos.
+
+                inputNome.value = '';
+                inputEmail.value = '';
+                inputTelefone.value = '';
+                inputCidade.value = '';
+
+
+                // Bloqueia novamente os campos
+                // seguindo a ordem original.
+
+                atualizarLiberacao();
+
+
+                // Volta para o primeiro campo.
+
+                inputNome.focus();
+
+
+                // Atualiza a tabela.
+
+                await carregarClientes();
+
+            } else {
+
+                mostrarMensagem(
+                    extrairMensagemErro(dados),
+                    'erro'
+                );
+
             }
+
+        } catch (erro) {
+
+            console.error(
+                'Erro ao cadastrar cliente:',
+                erro
+            );
+
+            mostrarMensagem(
+                'Erro de conexão com o servidor.',
+                'erro'
+            );
+
+        } finally {
+
+            btnEnviar.disabled = false;
+
         }
 
-        btnEnviar.addEventListener('click', enviarCadastro);
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
+
+    // =========================================================
+    // BOTÃO
+    // =========================================================
+
+    btnEnviar.addEventListener(
+        'click',
+        enviarCadastro
+    );
+
+
+    // =========================================================
+    // INICIALIZAÇÃO
+    // =========================================================
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+
+            // Apenas o Nome começa liberado.
+
             atualizarLiberacao();
+
+            // Carrega os clientes já cadastrados.
+
             carregarClientes();
-        });
-    </script>
+
+        }
+    );
+
+</script>
+```
+
 </body>
+
 </html>

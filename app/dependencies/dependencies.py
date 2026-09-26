@@ -1,80 +1,181 @@
 import logging
 from urllib.parse import quote_plus
 
-import sshtunnel
 from sshtunnel import SSHTunnelForwarder
 from sqlmodel import Session, create_engine
+from sqlalchemy import text
 
 from config.Config import settings
 
 
-sshtunnel.SSH_TIMEOUT = 5.0
-sshtunnel.TUNNEL_TIMEOUT = 5.0
-
-
 class Database:
-    """Gerencia o túnel SSH e a engine SQLModel/SQLAlchemy."""
 
     def __init__(self):
-        self._tunnel: SSHTunnelForwarder | None = None
+        self._tunnel = None
         self._engine = None
 
-    def _get_tunnel(self) -> SSHTunnelForwarder:
-        if self._tunnel is None or not self._tunnel.is_active:
+    def _get_tunnel(self):
+        if self._tunnel is not None and self._tunnel.is_active:
+            return self._tunnel
+
+        if self._tunnel is not None:
+            try:
+                self._tunnel.stop()
+            except Exception:
+                logging.exception("Erro ao encerrar túnel SSH anterior.")
+            self._tunnel = None
+
+        logging.info(
+            "Iniciando túnel SSH para %s:%s...",
+            settings.SSH_HOST,
+            settings.SSH_PORT
+        )
+
+        try:
             self._tunnel = SSHTunnelForwarder(
                 (settings.SSH_HOST, settings.SSH_PORT),
                 ssh_username=settings.SSH_USER,
                 ssh_password=settings.SSH_PASSWORD,
-                remote_bind_address=("127.0.0.1", settings.DB_PORT),
-                local_bind_address=("127.0.0.1", 3307),
+                remote_bind_address=(
+                    settings.DB_HOST,
+                    settings.DB_PORT
+                ),
+                local_bind_address=(
+                    "127.0.0.1",
+                    0
+                ),
+                set_keepalive=30.0
             )
 
-            try:
-                self._tunnel.start()
-                logging.info(
-                    "Túnel SSH conectado com sucesso. Porta local: %s",
-                    self._tunnel.local_bind_port,
-                )
-            except Exception:
-                logging.exception("Erro ao iniciar o túnel SSH.")
-                self._tunnel = None
-                raise
+            self._tunnel.start()
 
-        return self._tunnel
+            logging.info("Túnel SSH conectado.")
+
+            logging.info(
+                "MySQL remoto %s:%s disponível localmente em 127.0.0.1:%s",
+                settings.DB_HOST,
+                settings.DB_PORT,
+                self._tunnel.local_bind_port
+            )
+
+            return self._tunnel
+
+        except Exception:
+            logging.exception(
+                "Não foi possível iniciar o túnel SSH."
+            )
+            self._tunnel = None
+            raise
 
     def get_engine(self):
-        if self._engine is None:
-            tunnel = self._get_tunnel()
-            senha_segura = quote_plus(settings.DB_PASSWORD)
+        if (
+            self._engine is not None
+            and self._tunnel is not None
+            and self._tunnel.is_active
+        ):
+            return self._engine
 
-            url = (
-                f"mysql+pymysql://{settings.DB_USER}:{senha_segura}"
-                f"@127.0.0.1:{tunnel.local_bind_port}/{settings.DB_NAME}"
-            )
+        if self._engine is not None:
+            try:
+                self._engine.dispose()
+            except Exception:
+                logging.exception(
+                    "Erro ao descartar engine antiga."
+                )
 
-            self._engine = create_engine(
-                url,
-                echo=False,
-                pool_pre_ping=True,
-            )
+            self._engine = None
 
-            logging.info("Engine MySQL criada através do túnel SSH.")
+        tunnel = self._get_tunnel()
+
+        senha_segura = quote_plus(settings.DB_PASSWORD)
+
+        database_url = (
+            f"mysql+pymysql://"
+            f"{settings.DB_USER}:"
+            f"{senha_segura}"
+            f"@127.0.0.1:"
+            f"{tunnel.local_bind_port}/"
+            f"{settings.DB_NAME}"
+            f"?charset=utf8mb4"
+        )
+
+        logging.info(
+            "Criando engine MySQL através do túnel SSH."
+        )
+
+        self._engine = create_engine(
+            database_url,
+            echo=False,
+            pool_pre_ping=True,
+            pool_recycle=1800,
+            pool_size=5,
+            max_overflow=10,
+            connect_args={
+                "connect_timeout": 10
+            }
+        )
 
         return self._engine
 
     def get_db(self):
         engine = self.get_engine()
+
         with Session(engine) as session:
-            yield session
+            try:
+                yield session
+            except Exception:
+                session.rollback()
+                raise
+
+    def test_connection(self):
+        try:
+            engine = self.get_engine()
+
+            with engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+
+            logging.info(
+                "Conexão com MySQL testada com sucesso."
+            )
+
+            return True
+
+        except Exception:
+            logging.exception(
+                "Falha no teste de conexão com MySQL."
+            )
+
+            return False
 
     def close_tunnel(self):
-        if self._tunnel is not None:
-            if self._tunnel.is_active:
-                self._tunnel.stop()
-            self._tunnel = None
+        logging.info(
+            "Encerrando conexão com banco de dados..."
+        )
 
-        self._engine = None
-        logging.info("Túnel SSH encerrado.")
+        if self._engine is not None:
+            try:
+                self._engine.dispose()
+            except Exception:
+                logging.exception(
+                    "Erro ao encerrar engine."
+                )
+
+            self._engine = None
+
+        if self._tunnel is not None:
+            try:
+                if self._tunnel.is_active:
+                    self._tunnel.stop()
+            except Exception:
+                logging.exception(
+                    "Erro ao encerrar túnel SSH."
+                )
+            finally:
+                self._tunnel = None
+
+        logging.info(
+            "Conexão com banco encerrada."
+        )
 
 
 database = Database()
