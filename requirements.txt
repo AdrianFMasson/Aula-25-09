@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlmodel
+pymysql
+sshtunnel
+paramiko==3.5.1
+pydantic-settings
+jinja2

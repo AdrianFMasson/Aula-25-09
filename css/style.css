@@ -1,0 +1,33 @@
+*{box-sizing:border-box;font-family:Copperplate,'Copperplate Gothic Light',serif}
+html,body{height:100%;margin:0;padding:0}
+body{background-color:#FFE5D9;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px 20px}
+.container{background-color:#fff;width:640px;max-width:95vw;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.15);overflow:hidden;padding:30px 35px 35px}
+h1{margin:0 0 24px;font-size:1.7rem;color:#005F73;letter-spacing:.5px}
+.mensagem{text-align:left;font-size:.85rem;margin-bottom:12px;min-height:18px}
+.mensagem.erro{color:#b00020}
+.mensagem.sucesso{color:#2E7D32}
+.campos{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin-bottom:24px}
+.campo{display:flex;flex-direction:column}
+.campo label{margin-bottom:8px;color:#4a4a4a;font-size:.85rem}
+.campo input{padding:12px 14px;border:1.5px solid #B87333;border-radius:8px;font-size:.95rem;background-color:#fbfbfb;color:#333}
+.campo input:disabled{background-color:#f2f2f2;border-color:#d9c5b0;color:#999;cursor:not-allowed}
+.campo input:focus{outline:none;border-color:#0A9396}
+#botaoCadastrar{display:block;margin:0 0 26px auto;background-color:#13C165;color:#fff;border:none;padding:12px 28px;border-radius:8px;font-size:.95rem;font-weight:bold;cursor:pointer;transition:background-color .2s ease}
+#botaoCadastrar:hover{background-color:#0FA655}
+#botaoCadastrar:disabled{background-color:#a5a5a5;cursor:not-allowed}
+.tabela{border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;max-height:260px;overflow-y:auto}
+.linha{display:grid;grid-template-columns:1.2fr 1.5fr 1.2fr 1fr;font-size:.85rem}
+.linha>*{padding:12px 14px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabela>.cabecalho{background-color:#fafafa;color:#4a4a4a;border-bottom:1px solid #e5e5e5;position:sticky;top:0}
+.tabela>.cabecalho>*{font-size:.8rem;color:#4a4a4a}
+#listaClientes .linha{border-bottom:1px solid #f0f0f0}
+#listaClientes .linha:last-child{border-bottom:none}
+@media(max-width:650px){
+    body{padding:20px 10px}
+    .container{width:100%;padding:25px 20px 25px}
+}
+@media(max-width:520px){
+    .campos{grid-template-columns:1fr}
+    .linha{grid-template-columns:1fr 1.5fr 1.2fr 1fr}
+    .linha>*{padding:10px 8px;font-size:.75rem}
+}
