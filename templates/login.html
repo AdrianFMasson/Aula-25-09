@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/login.css"
+    >
+
+</head>
+
+<body>
+
+    <main class="container">
+
+        <div class="window-bar">
+
+            <span class="bolinha vermelha"></span>
+
+            <span class="bolinha amarela"></span>
+
+            <span class="bolinha verde"></span>
+
+        </div>
+
+
+        <section class="conteudo">
+
+            <h1>Login</h1>
+
+
+            <form id="formLogin">
+
+                <div class="campo">
+
+                    <label for="email">
+                        E-mail
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Digite seu e-mail"
+                        autocomplete="email"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="senha">
+                        Senha
+                    </label>
+
+
+                    <div class="campo-senha">
+
+                        <input
+                            type="password"
+                            id="senha"
+                            name="senha"
+                            placeholder="Digite sua senha"
+                            minlength="6"
+                            autocomplete="current-password"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            required
+                        >
+
+
+                        <button
+                            type="button"
+                            id="mostrarSenha"
+                            aria-label="Mostrar senha"
+                        >
+                            👁
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    id="btnLogin"
+                >
+                    Entrar
+                </button>
+
+            </form>
+
+
+            <p id="mensagem"></p>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        const formulario =
+            document.getElementById(
+                "formLogin"
+            );
+
+
+        const email =
+            document.getElementById(
+                "email"
+            );
+
+
+        const senha =
+            document.getElementById(
+                "senha"
+            );
+
+
+        const mostrarSenha =
+            document.getElementById(
+                "mostrarSenha"
+            );
+
+
+        const mensagem =
+            document.getElementById(
+                "mensagem"
+            );
+
+
+        const btnLogin =
+            document.getElementById(
+                "btnLogin"
+            );
+
+
+        function limparSessaoLocal() {
+
+            sessionStorage.removeItem(
+                "token_sessao"
+            );
+
+        }
+
+
+        function marcarLoginObrigatorio() {
+
+            sessionStorage.setItem(
+                "login_obrigatorio",
+                "true"
+            );
+
+        }
+
+
+        function encerrarSessaoAnterior() {
+
+            const token =
+                sessionStorage.getItem(
+                    "token_sessao"
+                );
+
+
+            sessionStorage.removeItem(
+                "token_sessao"
+            );
+
+
+            if (!token) {
+
+                return;
+
+            }
+
+
+            fetch(
+                "/api/logout",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Authorization":
+                            `Bearer ${token}`
+                    },
+
+                    credentials:
+                        "same-origin",
+
+                    keepalive:
+                        true
+                }
+            ).catch(() => {});
+
+        }
+
+
+        function prepararPaginaLogin() {
+
+            limparSessaoLocal();
+
+            marcarLoginObrigatorio();
+
+            formulario.reset();
+
+            senha.type =
+                "password";
+
+            mostrarSenha.textContent =
+                "👁";
+
+            mostrarSenha.setAttribute(
+                "aria-label",
+                "Mostrar senha"
+            );
+
+            mensagem.textContent =
+                "";
+
+            mensagem.style.color =
+                "";
+
+            btnLogin.disabled =
+                false;
+
+            btnLogin.textContent =
+                "Entrar";
+
+        }
+
+
+        mostrarSenha.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    senha.type ===
+                    "password"
+                ) {
+
+                    senha.type =
+                        "text";
+
+                    mostrarSenha.textContent =
+                        "🙈";
+
+                    mostrarSenha.setAttribute(
+                        "aria-label",
+                        "Ocultar senha"
+                    );
+
+                } else {
+
+                    senha.type =
+                        "password";
+
+                    mostrarSenha.textContent =
+                        "👁";
+
+                    mostrarSenha.setAttribute(
+                        "aria-label",
+                        "Mostrar senha"
+                    );
+
+                }
+
+            }
+        );
+
+
+        formulario.addEventListener(
+            "submit",
+            async (event) => {
+
+                event.preventDefault();
+
+                mensagem.textContent =
+                    "";
+
+                mensagem.style.color =
+                    "";
+
+                btnLogin.disabled =
+                    true;
+
+                btnLogin.textContent =
+                    "Entrando...";
+
+
+                const dados =
+                    new URLSearchParams();
+
+
+                dados.append(
+                    "email",
+                    email.value.trim()
+                );
+
+
+                dados.append(
+                    "senha",
+                    senha.value
+                );
+
+
+                try {
+
+                    const resposta =
+                        await fetch(
+                            "/api/login",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded"
+                                },
+
+                                body:
+                                    dados,
+
+                                credentials:
+                                    "same-origin",
+
+                                cache:
+                                    "no-store"
+                            }
+                        );
+
+
+                    const resultado =
+                        await resposta.json();
+
+
+                    if (!resposta.ok) {
+
+                        if (
+                            typeof resultado.detail ===
+                            "string"
+                        ) {
+
+                            mensagem.textContent =
+                                resultado.detail;
+
+                        } else if (
+                            Array.isArray(
+                                resultado.detail
+                            )
+                        ) {
+
+                            mensagem.textContent =
+                                resultado.detail
+                                    .map(item => {
+
+                                        if (
+                                            typeof item ===
+                                            "string"
+                                        ) {
+
+                                            return item;
+
+                                        }
+
+
+                                        if (
+                                            item &&
+                                            typeof item.msg ===
+                                            "string"
+                                        ) {
+
+                                            return item.msg;
+
+                                        }
+
+
+                                        return "Dados inválidos.";
+
+                                    })
+                                    .join(" ");
+
+                        } else {
+
+                            mensagem.textContent =
+                                "Não foi possível realizar o login.";
+
+                        }
+
+
+                        mensagem.style.color =
+                            "#D62828";
+
+
+                        btnLogin.disabled =
+                            false;
+
+
+                        btnLogin.textContent =
+                            "Entrar";
+
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !resultado.token
+                    ) {
+
+                        throw new Error(
+                            "O servidor não retornou o token de sessão."
+                        );
+
+                    }
+
+
+                    sessionStorage.setItem(
+                        "token_sessao",
+                        resultado.token
+                    );
+
+
+                    sessionStorage.removeItem(
+                        "login_obrigatorio"
+                    );
+
+
+                    sessionStorage.removeItem(
+                        "navegacao_saida"
+                    );
+
+
+                    mensagem.textContent =
+                        resultado.mensagem ||
+                        "Login realizado com sucesso.";
+
+
+                    mensagem.style.color =
+                        "#13C165";
+
+
+                    window.location.href =
+                        "/";
+
+
+                } catch (erro) {
+
+                    console.error(
+                        "Erro no login:",
+                        erro
+                    );
+
+
+                    mensagem.textContent =
+                        erro.message ===
+                        "O servidor não retornou o token de sessão."
+                            ? erro.message
+                            : "Não foi possível conectar ao servidor.";
+
+
+                    mensagem.style.color =
+                        "#D62828";
+
+
+                    btnLogin.disabled =
+                        false;
+
+
+                    btnLogin.textContent =
+                        "Entrar";
+
+                }
+
+            }
+        );
+
+
+        window.addEventListener(
+            "pageshow",
+            () => {
+
+                prepararPaginaLogin();
+
+                encerrarSessaoAnterior();
+
+            }
+        );
+
+
+        prepararPaginaLogin();
+
+    </script>
+
+</body>
+
+</html>

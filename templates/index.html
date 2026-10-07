@@ -1,203 +1,1143 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Cadastro de Clientes</title>
-    <link rel="stylesheet" href="/css/style.css">
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
 </head>
+
 <body>
+
     <main class="container">
+
         <h1>Cadastro de Clientes</h1>
 
-        <p id="mensagem" class="mensagem"></p>
+        <p
+            id="mensagem"
+            class="mensagem"
+        ></p>
 
         <form id="formCliente">
+
             <div class="campos">
-                <div class="campo">
-                    <label for="nome">Nome</label>
-                    <input type="text" id="nome" name="nome" required>
-                </div>
 
                 <div class="campo">
-                    <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" required>
+
+                    <label for="nome">
+                        Nome
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        required
+                    >
+
                 </div>
 
-                <div class="campo">
-                    <label for="telefone">Telefone</label>
-                    <input type="text" id="telefone" name="telefone" required>
-                </div>
 
                 <div class="campo">
-                    <label for="cidade">Cidade</label>
-                    <input type="text" id="cidade" name="cidade" required>
+
+                    <label for="email">
+                        E-mail
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                    >
+
                 </div>
+
+
+                <div class="campo">
+
+                    <label for="telefone">
+                        Telefone
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="telefone"
+                        name="telefone"
+                        placeholder="(XX)XXXXX-XXXX"
+                        maxlength="15"
+                        inputmode="numeric"
+                        autocomplete="tel"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label for="cidade">
+                        Cidade
+                    </label>
+
+                    <input
+                        type="text"
+                        id="cidade"
+                        name="cidade"
+                        required
+                    >
+
+                </div>
+
             </div>
 
-            <button type="submit" id="botaoCadastrar">Cadastrar</button>
+
+            <button
+                type="submit"
+                id="botaoCadastrar"
+            >
+                Cadastrar
+            </button>
+
         </form>
 
+
         <div class="tabela">
+
             <div class="linha cabecalho">
-                <strong>Nome</strong>
-                <strong>E-mail</strong>
-                <strong>Telefone</strong>
-                <strong>Cidade</strong>
+
+                <strong>
+                    Nome
+                </strong>
+
+                <strong>
+                    E-mail
+                </strong>
+
+                <strong>
+                    Telefone
+                </strong>
+
+                <strong>
+                    Cidade
+                </strong>
+
             </div>
 
-            <div id="listaClientes"></div>
+
+            <div
+                id="listaClientes"
+            ></div>
+
         </div>
+
     </main>
 
+
     <script>
-        const API_URL = "/api/clientes";
 
-        const formCliente = document.getElementById("formCliente");
-        const mensagem = document.getElementById("mensagem");
-        const listaClientes = document.getElementById("listaClientes");
-        const botaoCadastrar = document.getElementById("botaoCadastrar");
+        const API_URL =
+            "/api/clientes";
 
-        function mostrarMensagem(texto, tipo = "") {
-            mensagem.textContent = texto;
-            mensagem.className = `mensagem ${tipo}`;
+
+        const TOKEN_KEY =
+            "token_sessao";
+
+
+        const SAIDA_KEY =
+            "navegacao_saida";
+
+
+        const formCliente =
+            document.getElementById(
+                "formCliente"
+            );
+
+
+        const mensagem =
+            document.getElementById(
+                "mensagem"
+            );
+
+
+        const listaClientes =
+            document.getElementById(
+                "listaClientes"
+            );
+
+
+        const botaoCadastrar =
+            document.getElementById(
+                "botaoCadastrar"
+            );
+
+
+        const telefone =
+            document.getElementById(
+                "telefone"
+            );
+
+
+        let paginaInicializada =
+            false;
+
+
+        let redirecionando =
+            false;
+
+
+        function obterToken() {
+
+            return sessionStorage.getItem(
+                TOKEN_KEY
+            );
+
         }
 
-        function criarCelula(texto) {
-            const elemento = document.createElement("span");
-            elemento.textContent = texto ?? "";
-            return elemento;
+
+        function removerToken() {
+
+            sessionStorage.removeItem(
+                TOKEN_KEY
+            );
+
         }
 
-        function exibirClientes(clientes) {
-            listaClientes.innerHTML = "";
 
-            clientes.forEach(cliente => {
-                const linha = document.createElement("div");
-                linha.className = "linha";
+        function marcarSaida() {
 
-                linha.appendChild(criarCelula(cliente.nome));
-                linha.appendChild(criarCelula(cliente.email));
-                linha.appendChild(criarCelula(cliente.telefone));
-                linha.appendChild(criarCelula(cliente.cidade));
+            sessionStorage.setItem(
+                SAIDA_KEY,
+                "true"
+            );
 
-                listaClientes.appendChild(linha);
-            });
         }
 
-        async function carregarClientes() {
+
+        function removerMarcacaoSaida() {
+
+            sessionStorage.removeItem(
+                SAIDA_KEY
+            );
+
+        }
+
+
+        function possuiMarcacaoSaida() {
+
+            return (
+                sessionStorage.getItem(
+                    SAIDA_KEY
+                ) === "true"
+            );
+
+        }
+
+
+        function irParaLogin() {
+
+            if (redirecionando) {
+
+                return;
+
+            }
+
+
+            redirecionando =
+                true;
+
+
+            removerToken();
+
+
+            removerMarcacaoSaida();
+
+
+            window.location.replace(
+                "/login"
+            );
+
+        }
+
+
+        async function encerrarSessaoServidor(
+            token
+        ) {
+
+            if (!token) {
+
+                return;
+
+            }
+
+
             try {
-                const resposta = await fetch(API_URL);
+
+                await fetch(
+                    "/api/logout",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Authorization":
+                                `Bearer ${token}`
+                        },
+
+                        credentials:
+                            "same-origin",
+
+                        keepalive:
+                            true
+                    }
+                );
+
+            } catch (erro) {
+
+                console.error(
+                    "Erro ao encerrar sessão no servidor:",
+                    erro
+                );
+
+            }
+
+        }
+
+
+        async function invalidarSessaoPorHistorico() {
+
+            const token =
+                obterToken();
+
+
+            removerToken();
+
+
+            removerMarcacaoSaida();
+
+
+            await encerrarSessaoServidor(
+                token
+            );
+
+
+            window.location.replace(
+                "/login"
+            );
+
+        }
+
+
+        function obterTipoNavegacao() {
+
+            const entradas =
+                performance.getEntriesByType(
+                    "navigation"
+                );
+
+
+            if (
+                !entradas.length
+            ) {
+
+                return "navigate";
+
+            }
+
+
+            return entradas[0].type;
+
+        }
+
+
+        async function verificarSessao() {
+
+            const token =
+                obterToken();
+
+
+            if (!token) {
+
+                irParaLogin();
+
+                return false;
+
+            }
+
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        "/api/verificar-login",
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`,
+
+                                "Cache-Control":
+                                    "no-cache"
+                            },
+
+                            cache:
+                                "no-store",
+
+                            credentials:
+                                "same-origin"
+                        }
+                    );
+
 
                 if (!resposta.ok) {
-                    throw new Error(`Erro HTTP ${resposta.status}`);
+
+                    irParaLogin();
+
+                    return false;
+
                 }
 
-                const clientes = await resposta.json();
-                exibirClientes(clientes);
+
+                const resultado =
+                    await resposta.json();
+
+
+                if (
+                    !resultado.autenticado
+                ) {
+
+                    irParaLogin();
+
+                    return false;
+
+                }
+
+
+                return true;
+
             } catch (erro) {
-                console.error("Erro ao carregar clientes:", erro);
+
+                console.error(
+                    "Erro ao verificar sessão:",
+                    erro
+                );
+
+                irParaLogin();
+
+                return false;
+
+            }
+
+        }
+
+
+        function mostrarMensagem(
+            texto,
+            tipo = ""
+        ) {
+
+            mensagem.textContent =
+                texto;
+
+            mensagem.className =
+                `mensagem ${tipo}`;
+
+        }
+
+
+        function mascararTelefone(
+            campo
+        ) {
+
+            let valor =
+                campo.value
+                    .replace(/\D/g, "")
+                    .substring(
+                        0,
+                        11
+                    );
+
+
+            if (valor.length <= 2) {
+
+                campo.value =
+                    valor;
+
+            } else if (
+                valor.length <= 7
+            ) {
+
+                campo.value =
+                    `(${valor.substring(0, 2)})${valor.substring(2)}`;
+
+            } else {
+
+                campo.value =
+                    `(${valor.substring(0, 2)})${valor.substring(2, 7)}-${valor.substring(7, 11)}`;
+
+            }
+
+        }
+
+
+        telefone.addEventListener(
+            "input",
+            function() {
+
+                mascararTelefone(
+                    telefone
+                );
+
+            }
+        );
+
+
+        telefone.addEventListener(
+            "keydown",
+            function(evento) {
+
+                const teclasPermitidas = [
+                    "Backspace",
+                    "Delete",
+                    "Tab",
+                    "ArrowLeft",
+                    "ArrowRight",
+                    "Home",
+                    "End"
+                ];
+
+
+                if (
+                    teclasPermitidas.includes(
+                        evento.key
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    (evento.ctrlKey ||
+                    evento.metaKey) &&
+                    [
+                        "a",
+                        "c",
+                        "v",
+                        "x"
+                    ].includes(
+                        evento.key.toLowerCase()
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    !/^\d$/.test(
+                        evento.key
+                    )
+                ) {
+
+                    evento.preventDefault();
+
+                }
+
+            }
+        );
+
+
+        telefone.addEventListener(
+            "paste",
+            function(evento) {
+
+                evento.preventDefault();
+
+
+                const texto =
+                    evento.clipboardData
+                        .getData("text");
+
+
+                telefone.value =
+                    texto
+                        .replace(/\D/g, "")
+                        .substring(
+                            0,
+                            11
+                        );
+
+
+                mascararTelefone(
+                    telefone
+                );
+
+            }
+        );
+
+
+        function criarCelula(
+            texto
+        ) {
+
+            const elemento =
+                document.createElement(
+                    "span"
+                );
+
+
+            elemento.textContent =
+                texto ?? "";
+
+
+            return elemento;
+
+        }
+
+
+        function exibirClientes(
+            clientes
+        ) {
+
+            listaClientes.innerHTML =
+                "";
+
+
+            clientes.forEach(
+                cliente => {
+
+                    const linha =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    linha.className =
+                        "linha";
+
+
+                    linha.appendChild(
+                        criarCelula(
+                            cliente.nome
+                        )
+                    );
+
+
+                    linha.appendChild(
+                        criarCelula(
+                            cliente.email
+                        )
+                    );
+
+
+                    linha.appendChild(
+                        criarCelula(
+                            cliente.telefone
+                        )
+                    );
+
+
+                    linha.appendChild(
+                        criarCelula(
+                            cliente.cidade
+                        )
+                    );
+
+
+                    listaClientes.appendChild(
+                        linha
+                    );
+
+                }
+            );
+
+        }
+
+
+        async function carregarClientes() {
+
+            const token =
+                obterToken();
+
+
+            if (!token) {
+
+                irParaLogin();
+
+                return;
+
+            }
+
+
+            try {
+
+                const resposta =
+                    await fetch(
+                        API_URL,
+                        {
+                            method: "GET",
+
+                            headers: {
+                                "Authorization":
+                                    `Bearer ${token}`,
+
+                                "Cache-Control":
+                                    "no-cache"
+                            },
+
+                            cache:
+                                "no-store",
+
+                            credentials:
+                                "same-origin"
+                        }
+                    );
+
+
+                if (
+                    resposta.status ===
+                        401 ||
+                    resposta.status ===
+                        403
+                ) {
+
+                    irParaLogin();
+
+                    return;
+
+                }
+
+
+                if (!resposta.ok) {
+
+                    throw new Error(
+                        `Erro HTTP ${resposta.status}`
+                    );
+
+                }
+
+
+                const clientes =
+                    await resposta.json();
+
+
+                exibirClientes(
+                    clientes
+                );
+
+            } catch (erro) {
+
+                console.error(
+                    "Erro ao carregar clientes:",
+                    erro
+                );
+
 
                 mostrarMensagem(
                     "Não foi possível carregar os clientes.",
                     "erro"
                 );
+
             }
+
         }
 
-        formCliente.addEventListener("submit", async function(evento) {
-            evento.preventDefault();
 
-            mostrarMensagem("");
+        formCliente.addEventListener(
+            "submit",
+            async function(evento) {
 
-            const dados = {
-                nome: document.getElementById("nome").value.trim(),
-                email: document.getElementById("email").value.trim(),
-                telefone: document.getElementById("telefone").value.trim(),
-                cidade: document.getElementById("cidade").value.trim()
-            };
+                evento.preventDefault();
 
-            if (!dados.nome || !dados.email || !dados.telefone || !dados.cidade) {
+
+                const autenticado =
+                    await verificarSessao();
+
+
+                if (!autenticado) {
+
+                    return;
+
+                }
+
+
                 mostrarMensagem(
-                    "Preencha todos os campos.",
-                    "erro"
+                    ""
                 );
-                return;
-            }
 
-            botaoCadastrar.disabled = true;
-            botaoCadastrar.textContent = "Cadastrando...";
 
-            try {
-                console.log("Enviando:", dados);
-                console.log("URL:", API_URL);
+                const numerosTelefone =
+                    telefone.value
+                        .replace(
+                            /\D/g,
+                            ""
+                        );
 
-                const resposta = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(dados)
-                });
 
-                const texto = await resposta.text();
+                if (
+                    numerosTelefone.length !==
+                    11
+                ) {
 
-                let resultado;
+                    mostrarMensagem(
+                        "Digite um telefone válido no formato (XX)XXXXX-XXXX.",
+                        "erro"
+                    );
+
+
+                    telefone.focus();
+
+                    return;
+
+                }
+
+
+                const dados = {
+
+                    nome:
+                        document
+                            .getElementById(
+                                "nome"
+                            )
+                            .value
+                            .trim(),
+
+                    email:
+                        document
+                            .getElementById(
+                                "email"
+                            )
+                            .value
+                            .trim(),
+
+                    telefone:
+                        telefone.value,
+
+                    cidade:
+                        document
+                            .getElementById(
+                                "cidade"
+                            )
+                            .value
+                            .trim()
+
+                };
+
+
+                if (
+                    !dados.nome ||
+                    !dados.email ||
+                    !dados.telefone ||
+                    !dados.cidade
+                ) {
+
+                    mostrarMensagem(
+                        "Preencha todos os campos.",
+                        "erro"
+                    );
+
+                    return;
+
+                }
+
+
+                botaoCadastrar.disabled =
+                    true;
+
+
+                botaoCadastrar.textContent =
+                    "Cadastrando...";
+
 
                 try {
-                    resultado = texto ? JSON.parse(texto) : null;
-                } catch {
-                    resultado = texto;
-                }
 
-                console.log("Status:", resposta.status);
-                console.log("Resposta:", resultado);
+                    const token =
+                        obterToken();
 
-                if (!resposta.ok) {
-                    let detalhe = `Erro HTTP ${resposta.status}`;
 
-                    if (resultado && typeof resultado === "object") {
-                        if (resultado.detail) {
-                            detalhe = Array.isArray(resultado.detail)
-                                ? resultado.detail.map(erro => erro.msg).join(", ")
-                                : resultado.detail;
-                        }
+                    const resposta =
+                        await fetch(
+                            API_URL,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Authorization":
+                                        `Bearer ${token}`
+                                },
+
+                                credentials:
+                                    "same-origin",
+
+                                body:
+                                    JSON.stringify(
+                                        dados
+                                    )
+                            }
+                        );
+
+
+                    if (
+                        resposta.status ===
+                            401 ||
+                        resposta.status ===
+                            403
+                    ) {
+
+                        irParaLogin();
+
+                        return;
+
                     }
 
-                    throw new Error(detalhe);
+
+                    const texto =
+                        await resposta.text();
+
+
+                    let resultado;
+
+
+                    try {
+
+                        resultado =
+                            texto
+                                ? JSON.parse(
+                                    texto
+                                )
+                                : null;
+
+                    } catch {
+
+                        resultado =
+                            texto;
+
+                    }
+
+
+                    if (!resposta.ok) {
+
+                        let detalhe =
+                            `Erro HTTP ${resposta.status}`;
+
+
+                        if (
+                            resultado &&
+                            typeof resultado ===
+                                "object" &&
+                            resultado.detail
+                        ) {
+
+                            detalhe =
+                                Array.isArray(
+                                    resultado.detail
+                                )
+                                    ? resultado.detail
+                                        .map(
+                                            erro =>
+                                                erro.msg
+                                        )
+                                        .join(
+                                            ", "
+                                        )
+                                    : resultado.detail;
+
+                        }
+
+
+                        throw new Error(
+                            detalhe
+                        );
+
+                    }
+
+
+                    mostrarMensagem(
+                        "Cliente cadastrado com sucesso!",
+                        "sucesso"
+                    );
+
+
+                    formCliente.reset();
+
+
+                    await carregarClientes();
+
+                } catch (erro) {
+
+                    console.error(
+                        "Erro ao cadastrar cliente:",
+                        erro
+                    );
+
+
+                    if (
+                        erro instanceof
+                        TypeError
+                    ) {
+
+                        mostrarMensagem(
+                            "Erro de conexão com o servidor. Verifique se o FastAPI está funcionando.",
+                            "erro"
+                        );
+
+                    } else {
+
+                        mostrarMensagem(
+                            `Erro ao cadastrar: ${erro.message}`,
+                            "erro"
+                        );
+
+                    }
+
+                } finally {
+
+                    botaoCadastrar.disabled =
+                        false;
+
+
+                    botaoCadastrar.textContent =
+                        "Cadastrar";
+
                 }
 
-                mostrarMensagem(
-                    "Cliente cadastrado com sucesso!",
-                    "sucesso"
-                );
-
-                formCliente.reset();
-
-                await carregarClientes();
-
-            } catch (erro) {
-                console.error("Erro ao cadastrar cliente:", erro);
-
-                if (erro instanceof TypeError) {
-                    mostrarMensagem(
-                        "Erro de conexão com o servidor. Verifique se o FastAPI está funcionando.",
-                        "erro"
-                    );
-                } else {
-                    mostrarMensagem(
-                        `Erro ao cadastrar: ${erro.message}`,
-                        "erro"
-                    );
-                }
-
-            } finally {
-                botaoCadastrar.disabled = false;
-                botaoCadastrar.textContent = "Cadastrar";
             }
-        });
+        );
 
-        carregarClientes();
+
+        async function iniciarPagina() {
+
+            if (paginaInicializada) {
+
+                return;
+
+            }
+
+
+            paginaInicializada =
+                true;
+
+
+            const tipoNavegacao =
+                obterTipoNavegacao();
+
+
+            const saiuDaPagina =
+                possuiMarcacaoSaida();
+
+
+            if (
+                tipoNavegacao ===
+                "reload"
+            ) {
+
+                removerMarcacaoSaida();
+
+            }
+
+
+            if (
+                tipoNavegacao ===
+                    "back_forward" &&
+                saiuDaPagina
+            ) {
+
+                await invalidarSessaoPorHistorico();
+
+                return;
+
+            }
+
+
+            const autenticado =
+                await verificarSessao();
+
+
+            if (!autenticado) {
+
+                return;
+
+            }
+
+
+            removerMarcacaoSaida();
+
+
+            await carregarClientes();
+
+        }
+
+
+        window.addEventListener(
+            "pagehide",
+            function() {
+
+                marcarSaida();
+
+            }
+        );
+
+
+        window.addEventListener(
+            "pageshow",
+            async function(evento) {
+
+                if (
+                    evento.persisted
+                ) {
+
+                    const token =
+                        obterToken();
+
+
+                    if (token) {
+
+                        await invalidarSessaoPorHistorico();
+
+                        return;
+
+                    }
+
+
+                    irParaLogin();
+
+                    return;
+
+                }
+
+
+                paginaInicializada =
+                    false;
+
+
+                await iniciarPagina();
+
+            }
+        );
+
+
+        iniciarPagina();
+
     </script>
+
 </body>
+
 </html>

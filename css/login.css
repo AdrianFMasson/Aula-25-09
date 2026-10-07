@@ -1,0 +1,184 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#FFE5D9;
+    font-family:Copperplate, "Copperplate Gothic Light", fantasy;
+}
+
+.container{
+    width:640px;
+    max-width:90%;
+    background:#FFFFFF;
+    border-radius:14px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+    overflow:hidden;
+}
+
+.window-bar{
+    height:38px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 15px;
+    background:#F5F5F5;
+    border-bottom:1px solid #E0E0E0;
+}
+
+.bolinha{
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    display:block;
+}
+
+.vermelha{
+    background:#FF5F57;
+}
+
+.amarela{
+    background:#FFBD2E;
+}
+
+.verde{
+    background:#28C840;
+}
+
+.conteudo{
+    padding:40px;
+}
+
+h1{
+    margin-bottom:30px;
+    text-align:center;
+    color:#005F73;
+    font-size:32px;
+}
+
+#formLogin{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+}
+
+.campo{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.campo label{
+    color:#005F73;
+    font-size:17px;
+    font-weight:bold;
+}
+
+.campo input{
+    width:100%;
+    height:48px;
+    padding:0 14px;
+    border:2px solid #B87333;
+    border-radius:8px;
+    outline:none;
+    background:#FFFFFF;
+    font-family:Arial, sans-serif;
+    font-size:16px;
+    font-weight:normal;
+    text-transform:none;
+    letter-spacing:normal;
+}
+
+.campo input:focus{
+    border-color:#005F73;
+    box-shadow:0 0 0 3px rgba(0,95,115,0.12);
+}
+
+.campo input::placeholder{
+    color:#999999;
+    font-family:Arial, sans-serif;
+    font-size:14px;
+    text-transform:none;
+}
+
+.campo-senha{
+    position:relative;
+    width:100%;
+}
+
+.campo-senha input{
+    padding-right:52px;
+    font-family:Arial, sans-serif;
+    text-transform:none;
+}
+
+#mostrarSenha{
+    position:absolute;
+    top:50%;
+    right:8px;
+    transform:translateY(-50%);
+    width:38px;
+    height:38px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+#mostrarSenha:hover{
+    background:#FFE5D9;
+    border-radius:6px;
+}
+
+#btnLogin{
+    width:100%;
+    height:48px;
+    margin-top:8px;
+    border:none;
+    border-radius:8px;
+    background:#13C165;
+    color:#FFFFFF;
+    font-family:Copperplate, "Copperplate Gothic Light", fantasy;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+#btnLogin:hover{
+    background:#0FA856;
+    transform:translateY(-1px);
+}
+
+#btnLogin:active{
+    transform:translateY(0);
+}
+
+#mensagem{
+    margin-top:20px;
+    text-align:center;
+    font-size:15px;
+}
+
+@media(max-width:500px){
+    .container{
+        width:95%;
+    }
+
+    .conteudo{
+        padding:25px;
+    }
+
+    h1{
+        font-size:28px;
+    }
+}
